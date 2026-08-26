@@ -1,0 +1,6 @@
+Trigger ~ "Good Night", Reply ~ "Good Night sweet dreams", Time ~ "7:00 PM"
+Trigger ~ "good morning", Reply ~ "Morning! Ready for today's shoot?", Time ~ "9:00 AM"
+Trigger ~ "reached", Reply ~ "Awesome! Coming down to the lobby in 2 mins."
+Trigger ~ "where are you", Reply ~ "Just parked the car, walking up now.", Time ~ "11:30 AM"
+Trigger ~ "free sunday", Reply ~ "Yes! Finally free this Sunday 🎬"
+

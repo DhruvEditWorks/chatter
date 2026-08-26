@@ -1,0 +1,66 @@
+{
+  "u-reyansh": {
+    "name": "Reyansh",
+    "username": "reyansh",
+    "bio": "Director • Screenwriter • Mumbai 🎬",
+    "city": "Mumbai, India",
+    "phone": "+91 98200 12345",
+    "email": "reyansh@chatter.app",
+    "avatar": "avatars/reyansh.jpg",
+    "followers": 420,
+    "following": 180,
+    "online": true
+  },
+  "u-amaira": {
+    "name": "Amaira Khan",
+    "username": "amaira",
+    "bio": "Actor 🎭 theatre kid • script hoarder • Delhi → Mumbai.",
+    "city": "Mumbai, India",
+    "phone": "+91 99675 21340",
+    "email": "amaira.khan@chatter.app",
+    "avatar": "avatars/amaira.jpg",
+    "followers": 1280,
+    "following": 340,
+    "online": true
+  },
+  "u-aarav": {
+    "name": "Aarav Joshi",
+    "username": "aarav",
+    "bio": "Cinematographer 🎬 lenses & light. coffee snob.",
+    "city": "Mumbai, India",
+    "phone": "+91 98190 88231",
+    "email": "aarav.dp@chatter.app",
+    "avatar": "avatars/aarav.jpg",
+    "followers": 890,
+    "following": 210,
+    "online": false,
+    "lastSeen": "35m ago"
+  },
+  "u-riya": {
+    "name": "Riya Verma",
+    "username": "riya",
+    "bio": "Production Designer 🎨 making chaos look pretty.",
+    "city": "Mumbai, India",
+    "phone": "+91 97690 44120",
+    "email": "riya.art@chatter.app",
+    "avatar": "avatars/riya.jpg",
+    "followers": 610,
+    "following": 195,
+    "online": false,
+    "lastSeen": "3h ago"
+  },
+  "u-mom": {
+    "name": "Sunita Mehta",
+    "username": "mom",
+    "bio": "Mother ❤️ family first always.",
+    "city": "Delhi, India",
+    "phone": "+91 98110 55432",
+    "email": "sunita.m@chatter.app",
+    "avatar": "avatars/mom.jpg",
+    "followers": 120,
+    "following": 45,
+    "online": false,
+    "lastSeen": "Yesterday at 10:15 PM"
+  }
+}
+
