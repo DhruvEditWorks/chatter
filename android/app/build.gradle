@@ -1,0 +1,53 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Release signing credentials (dev key, committed on purpose - see ANDROID.md).
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file('keystore.properties')
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+
+android {
+    namespace 'com.chatter.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.chatter.app'
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '1.0.0'
+    }
+
+    signingConfigs {
+        release {
+            storeFile rootProject.file(keystoreProps['storeFile']
+                    ?: 'keystore/chatter-dev.keystore')
+            storePassword keystoreProps['storePassword']
+            keyAlias keystoreProps['keyAlias'] ?: 'chatter'
+            keyPassword keystoreProps['keyPassword']
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+        }
+        debug {
+            // Debug builds use the standard debug key.
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Zero external dependencies: framework WebView + bundled web assets only.
+dependencies {
+}

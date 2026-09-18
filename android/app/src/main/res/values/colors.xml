@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="chatter_accent">#F4503C</color>
+    <color name="chatter_accent2">#FF7A54</color>
+    <color name="splash_background">#FFFFFF</color>
+    <color name="status_bar">#FFFFFF</color>
+    <color name="navigation_bar">#FFFFFF</color>
+</resources>

@@ -1,0 +1,26 @@
+# Android / Gradle build outputs
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+.gradle/
+
+# Generated web assets (rebuilt by tools/prepare_www.py at build time)
+android/app/src/main/assets/www/
+
+# Build log (also committed per-run into dist/BUILD_STATUS.txt)
+gradle-build.log
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local APK build cache
+tools/.android-tools/
+tools/.build/
+# androguard session db
+androguard.db

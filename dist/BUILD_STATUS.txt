@@ -1,0 +1,72 @@
+Chatter APK build (local, no SDK/Gradle)
+========================================
+date: 2026-09-18T13:44:23.389299+00:00
+chatter-debug.apk: 1206642 bytes  sha256=baad1c57a08d43623e79d8ceddb1efb0c03efd9a997f3ba415c0927be5df661c
+chatter-release.apk: 1206640 bytes  sha256=4cf2a2d6fc2035c1943b409597e5031248c724c5f472c76846bbfffcff1875d3
+
+--- aapt2 dump badging (release) ---
+package: name='com.chatter.app' versionCode='1' versionName='1.0.0' platformBuildVersionName='14' platformBuildVersionCode='34' compileSdkVersion='34' compileSdkVersionCodename='14'
+minSdkVersion:'24'
+targetSdkVersion:'34'
+uses-permission: name='android.permission.INTERNET'
+uses-permission: name='android.permission.ACCESS_NETWORK_STATE'
+application-label:'Chatter'
+application-icon-160:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-240:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-320:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-480:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-640:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-65534:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-65535:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application: label='Chatter' icon='res/mipmap-anydpi-v26/ic_launcher.xml'
+launchable-activity: name='com.chatter.app.MainActivity'  label='' icon=''
+feature-group: label=''
+  uses-feature: name='android.hardware.faketouch'
+  uses-implied-feature: name='android.hardware.faketouch' reason='default feature for all apps'
+main
+supports-screens: 'small' 'normal' 'large' 'xlarge'
+supports-any-density: 'true'
+locales: '--_--'
+densities: '160' '240' '320' '480' '640' '65534' '65535'
+
+--- apksigner verify (release) ---
+ure Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Chatter Dev, OU=Mobile, O=Chatter
+Signer #1 certificate SHA-256 digest: 150fef86e5c2b501e0e9a747508807e3881a7aa262cb0f58ef6a464b89040adc
+Signer #1 certificate SHA-1 digest: 8521ff8f8d6cd43da5d690392d41e6845fb52822
+Signer #1 certificate MD5 digest: d5713398bed9cbf7e1de31ce2cd9173d
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 2048
+Signer #1 public key SHA-256 digest: c657734c3e39edca96bc6fd160b63ec56d5c9cc88190518ca00586235047ff04
+Signer #1 public key SHA-1 digest: 9964e61852933bbf2db369e628aae87d4f50b599
+Signer #1 public key MD5 digest: cae3692d8d88fa850233b4d082db508e
+
+--- verify --min-sdk-version 21 ---
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by org.conscrypt.NativeLibraryUtil in an unnamed module (file:/home/user/chatter/tools/.android-tools/lib/apksigner.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+Verifies
+Verified using v1 scheme (JAR signing): true
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+
+--- dex classes ---
+Lcom/chatter/app/ChatterBridge$1;
+Lcom/chatter/app/ChatterBridge;
+Lcom/chatter/app/ChatterWebChromeClient;
+Lcom/chatter/app/ChatterWebViewClient;
+Lcom/chatter/app/MainActivity;
+Lcom/chatter/app/R$color;
+Lcom/chatter/app/R$drawable;
+Lcom/chatter/app/R$mipmap;
+Lcom/chatter/app/R$string;
+Lcom/chatter/app/R$style;
+Lcom/chatter/app/R;
