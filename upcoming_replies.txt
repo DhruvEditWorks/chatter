@@ -1,0 +1,7 @@
+Contact ~ "Amaira", Trigger ~ "Good Night", Reply ~ "Good Night sweet dreams"
+Contact ~ "Amaira", Trigger ~ "good morning", Reply ~ "Morning! Ready for today's shoot?"
+Contact ~ "Amaira", Trigger ~ "photo", Reply ~ "https://images.unsplash.com/photo-1534528741775-53994a69daeb.jpg Here is the picture from today!"
+Contact ~ "Amaira", Trigger ~ "chai", Reply ~ "avatars/amaira.jpg"
+Contact ~ "Aarav", Trigger ~ "reached", Reply ~ "Awesome! Coming down to the lobby in 2 mins."
+Contact ~ "Riya", Trigger ~ "where are you", Reply ~ "Just parked the car, walking up now."
+Contact ~ "Sunita", Trigger ~ "free sunday", Reply ~ "Yes! Finally free this Sunday 🎬"
