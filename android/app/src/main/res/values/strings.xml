@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Chatter</string>
+    <string name="title_activity_main">Chatter</string>
+    <string name="package_name">com.chatter.app</string>
+    <string name="custom_url_scheme">com.chatter.app</string>
+</resources>

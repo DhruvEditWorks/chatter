@@ -1,0 +1,12 @@
+{
+  "appId": "com.chatter.app",
+  "appName": "Chatter",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#ffffff"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
