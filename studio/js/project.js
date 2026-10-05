@@ -50,6 +50,8 @@ export const DEFAULT_UI = {
   dotsBubble: true,
   typingLabel: 'typing…',
   typingColor: null,
+  onlineLabel: 'Online',
+  lastSeenPrefix: 'last seen ',
   statusBarTime: '9:41',
   battery: 78,
   showCaret: true,
@@ -78,8 +80,9 @@ export function newProject() {
     version: 2,
     name: 'Untitled chat',
     out: { w: 2048, h: 858, fps: 24, bg: 'transparent', duration: 20, autoDuration: true },
-    device: { w: 1170, h: 2532, radius: 0, fit: 'height', zoom: 1 },
-    theme: 'whatsapp-dark',
+    // default = full-bleed overlay: the UI *is* the frame (no phone bezel)
+    device: { w: 2048, h: 858, radius: 0, fit: 'height', zoom: 1, link: true },
+    theme: 'film-overlay',
     themeOverrides: {},
     scenes: [newScene('Amaira')],
     active: 0,
@@ -91,6 +94,7 @@ export function newProject() {
 export function hydrate(p) {
   p.out = { bg: 'transparent', autoDuration: true, ...p.out };
   p.device = { radius: 0, fit: 'height', zoom: 1, ...p.device };
+  if (p.device.link === undefined) p.device.link = p.device.w === p.out.w && p.device.h === p.out.h;
   p.themeOverrides = p.themeOverrides || {};
   p.scenes = (p.scenes || []).map((s) => {
     const sc = { ...newScene(s.contactName || 'Chat'), ...s };

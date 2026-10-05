@@ -108,6 +108,28 @@ Amaira: [img chat_imgs/pic.png] look at this
 | `nodots` | this reply appears with no typing indicator |
 | `notype` | this outgoing message is not typed in the bar, it just appears |
 | `react=❤️` | reaction pill on the bubble |
+| `clock=9:15PM` | force this bubble's timestamp (otherwise auto-increments) |
+
+Example — Scene 2, exactly the reference frame (this is the script the tool
+loads by default):
+
+```
+@contact "Amaira"
+@me "Reyansh"
+@clock "9:14 PM"
+@online
+
+Amaira: Heyy                                        || clock=9:14PM
+Amaira: Kya kar rahe ho?                            || clock=9:14PM
+Me: Haan                                            || clock=9:15PM typing=0.9
+Me: Bas thoda kaam kar raha tha                     || clock=9:15PM typing=2.1
+Amaira: Kal ka plan pakka hai na? 😊                || clock=9:15PM
+Me: Haan pakka                                      || clock=9:16PM typing=1.1
+Amaira: It's been so long...                        || clock=9:16PM
+Me: Sach? 🥺                                        || clock=9:16PM typing=0.8
+Amaira: Main seriously milne aa rahi hu is baar. 🤍 || clock=9:17PM dots=2.4
+Me: Main nervous hu yaar...                         || clock=9:17PM typing=2.2
+```
 
 ---
 
@@ -141,9 +163,31 @@ profile pictures (upload or path), wallpaper, status-bar clock, battery %,
 typing label, header-typing on/off, three-dot bubble on/off, default appear
 animation, scroll glide, and all three keyframe lists.
 
-**Look tab** — WhatsApp dark/light, iMessage dark/light, Instagram dark, plus
-every colour, radius, padding, font size and bar height exposed as a live field
-so the UI can be pixel-matched to a reference screenshot.
+**Look tab** — **Film Overlay (default)**, Film Overlay green, WhatsApp
+dark/light, iMessage dark/light, Instagram dark, plus every colour, radius,
+padding, font size and bar height exposed as a live field so the UI can be
+pixel-matched to a reference screenshot.
+
+### Film Overlay theme
+
+This is the default and it matches the reference frame exactly:
+
+* **full-bleed** — the chat UI *is* the 2.39:1 frame, no phone bezel, no status bar
+* **transparent background** — exports with real alpha, composite straight over the shot
+* **staggered columns** — incoming on the left, outgoing on the right, with a
+  *negative* cross-sender gap (`Gap (new sender)` = −6.5) so opposite-side
+  bubbles interleave vertically. That is what lets ten messages fit in a scope
+  frame instead of five.
+* glass bubbles (`rgba(48,54,62,.80)` / `rgba(37,99,235,.92)`), tail on every
+  bubble, inline timestamp + blue double ticks
+* header: ringed avatar · name · green dot + `Online` · video / call / ⋮
+* full-width rounded input pill with emoji + paperclip inside, mic outside,
+  which swaps to a blue send button the moment you start typing
+
+**Want real frosted glass?** Canvas can't blur footage that isn't there. Do it in
+Resolve: duplicate your footage on a track below, add a Gaussian Blur, and use
+the overlay clip's alpha as the matte (Fusion: `MatteControl`, or Edit page:
+Alpha output → Garbage matte). Two nodes, and you get true backdrop blur.
 
 **Timing tab** — the auto-layout engine: typing speed in characters/second,
 min/max typing time, their think time, gaps, tick delays, end hold.
@@ -167,6 +211,13 @@ Keyboard: `Space` play/pause · `←/→` step a frame (`Shift` = 10) · `Home`/
 Resolution presets: 2048×858, 1920×804, 2560×1072, 3840×1608, 4096×1716 (all
 2.39:1) plus UHD / HD / 9:16, or type any custom size. Frame rate 23.976 → 60,
 default **24**.
+
+**Output tab ▸ UI surface** has one switch that matters:
+
+* **full-bleed overlay** (default, on) — the UI fills the whole 2.39 frame and
+  the render surface follows the output resolution automatically.
+* **off** → phone mode: pick an iPhone/Android screen size, the UI is drawn as a
+  phone screen inside the frame, and the camera keyframes move/zoom/rotate it.
 
 ### Import steps
 

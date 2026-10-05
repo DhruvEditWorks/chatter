@@ -117,7 +117,69 @@ Object.assign(INSTAGRAM_DARK.bubble, {
 Object.assign(INSTAGRAM_DARK.dots, { bg: '#262626', fg: '#a8a8a8', r: 18 });
 Object.assign(INSTAGRAM_DARK.input, { bg: '#000000', pill: '#000000', pillStroke: '#262626', radius: 22, placeholderText: 'Message...', sendBg: '#3797f0' });
 
+/* ─────────────────────────────────────────────────────────────
+   FILM OVERLAY — matches the reference frame:
+   full-bleed 2.39:1 glass UI composited straight over footage.
+   No phone bezel, no status bar, transparent background, bubbles
+   staggered left/right so twice as many fit in a scope frame.
+   ───────────────────────────────────────────────────────────── */
+const FILM_OVERLAY = {
+  id: 'film-overlay',
+  label: 'Film Overlay — Scope (reference)',
+  variant: 'overlay',
+  font: FONT_STACK,
+  screenBg: 'transparent',
+  wallpaperOpacity: 1,
+  wallpaperTint: 'transparent',
+  deviceRadius: 0,
+
+  statusBar: { show: false, h: 0, fg: '#ffffff', size: 10, weight: 600, padX: 20, icons: false },
+
+  header: {
+    show: true, h: 28, bg: 'transparent', fg: '#ffffff', sub: '#4ade80',
+    nameSize: 8.2, nameWeight: 700, subSize: 5.8, avatar: 23, iconColor: '#ffffff',
+    showBack: false, showActions: true, padX: 20, gap: 7, divider: 'transparent',
+    statusDot: '#22c55e', statusDotR: 1.6, statusDotGap: 2.6,
+    avatarRing: 'rgba(255,255,255,0.92)', avatarRingW: 1.1,
+    iconSize: 9.4, iconGap: 16, iconRightPad: 19,
+    textShadow: 'rgba(0,0,0,0.55)', textShadowBlur: 3,
+  },
+
+  list: { padX: 19, padTop: 2, padBottom: 2, gap: 4.2, gapGroup: -6.5 },
+
+  bubble: {
+    maxW: 0.40, radius: 4.4, tailRadius: 1.4, padX: 5.6, padY: 2.55,
+    fontSize: 7, lineH: 8.8, timeSize: 4.5, timeGap: 4.5, tail: true, tailEvery: true,
+    tailW: 2.4, tailH: 3.2,
+    shadow: 'rgba(0,0,0,0.42)', shadowBlur: 2.2, shadowY: 0.8,
+    inBg: 'rgba(48,54,62,0.80)', inFg: '#ffffff', inTime: '#aab3bd',
+    outBg: 'rgba(37,99,235,0.92)', outFg: '#ffffff', outTime: 'rgba(214,228,255,0.88)',
+    tickSent: 'rgba(214,228,255,0.8)', tickRead: '#5aa9ff',
+    imgRadius: 4.5, imgMaxW: 0.34, captionPad: 3.5,
+  },
+
+  dots: { bg: 'rgba(48,54,62,0.80)', fg: '#c9d1d9', w: 26, h: 13.9, r: 4.4, dot: 1.5, gap: 2.6, amp: 1.4, speed: 1.1 },
+
+  input: {
+    show: true, h: 18, bg: 'transparent', pill: 'rgba(24,28,34,0.55)', fg: '#ffffff',
+    placeholder: '#b9bec4', placeholderText: 'Type a message...', icon: '#e8ebef',
+    sendBg: '#2563eb', sendFg: '#ffffff', radius: 8, fontSize: 7, padX: 14, pillPadX: 7.5,
+    caret: '#5aa9ff', pillStroke: 'rgba(255,255,255,0.22)', pillStrokeW: 0.5,
+    leftPad: 14.5, rightPad: 28, pillH: 15.4, iconSize: 8.2, outerIconSize: 8.6,
+  },
+
+  chip: { bg: 'rgba(0,0,0,0.38)', fg: '#cfd6dd', size: 5.4, radius: 3.5, padX: 5.5, padY: 2.6 },
+};
+
+const FILM_OVERLAY_GREEN = mk(FILM_OVERLAY);
+Object.assign(FILM_OVERLAY_GREEN, { id: 'film-overlay-green', label: 'Film Overlay — WhatsApp green' });
+Object.assign(FILM_OVERLAY_GREEN.bubble, {
+  outBg: 'rgba(0,92,75,0.90)', outTime: 'rgba(233,237,239,0.7)', tickRead: '#53bdeb',
+});
+
 export const THEMES = {
+  'film-overlay': FILM_OVERLAY,
+  'film-overlay-green': FILM_OVERLAY_GREEN,
   'whatsapp-dark': WHATSAPP_DARK,
   'whatsapp-light': WHATSAPP_LIGHT,
   'imessage-dark': IMESSAGE_DARK,
@@ -181,6 +243,14 @@ export const THEME_FIELDS = [
   ['input.caret', 'Caret color', 'color'],
   ['dots.bg', 'Typing bubble bg', 'color'],
   ['dots.fg', 'Typing dots color', 'color'],
+  ['header.statusDot', 'Online dot colour', 'color'],
+  ['header.iconSize', 'Header icon size', 'num', 4, 40, 0.2],
+  ['header.iconGap', 'Header icon gap', 'num', 2, 60, 0.5],
+  ['header.padX', 'Header side pad', 'num', 0, 80, 0.5],
+  ['input.leftPad', 'Input bar left pad', 'num', 0, 80, 0.5],
+  ['input.rightPad', 'Input bar right pad', 'num', 0, 90, 0.5],
+  ['input.pillH', 'Input pill height', 'num', 4, 60, 0.5],
+  ['input.iconSize', 'Input icon size', 'num', 3, 36, 0.2],
 ];
 
 export function getPath(obj, path) {

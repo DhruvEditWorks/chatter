@@ -62,7 +62,14 @@ function icon(ctx, name, cx, cy, size, color, lw = 1.9, fill = false) {
   ctx.restore();
 }
 
-function drawAvatar(ctx, src, cx, cy, d, fallbackText, th) {
+/** Soft drop shadow so white text stays legible over bright footage. */
+function withTextShadow(ctx, th, on) {
+  const hd = th.header;
+  if (on && hd.textShadow) { ctx.shadowColor = hd.textShadow; ctx.shadowBlur = hd.textShadowBlur || 3; ctx.shadowOffsetY = 0.5; }
+  else { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; }
+}
+
+function drawAvatar(ctx, src, cx, cy, d, fallbackText, th, ring) {
   const r = d / 2;
   ctx.save();
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
@@ -80,6 +87,13 @@ function drawAvatar(ctx, src, cx, cy, d, fallbackText, th) {
     ctx.fillText(String(fallbackText || '?').trim().slice(0, 1).toUpperCase(), cx, cy + d * 0.02);
   }
   ctx.restore();
+  if (ring && ring.color && ring.w > 0) {
+    ctx.save();
+    ctx.strokeStyle = ring.color;
+    ctx.lineWidth = ring.w;
+    ctx.beginPath(); ctx.arc(cx, cy, r - ring.w / 2, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
 }
 
 /* ───────── typing reveal (deterministic) ───────── */
@@ -222,9 +236,9 @@ export function headerStatus(sc, th, t, dotsM) {
   const v = evalStep(sc.tracks.status, t, { mode: 'online' });
   if (!v) return '';
   switch (v.mode) {
-    case 'online': return 'online';
-    case 'offline': return '';
-    case 'lastseen': return `last seen ${v.text || 'recently'}`;
+    case 'online': return sc.ui.onlineLabel || 'online';
+    case 'offline': return sc.ui.offlineLabel || '';
+    case 'lastseen': return `${sc.ui.lastSeenPrefix ?? 'last seen '}${v.text || 'recently'}`;
     case 'typing': return v.text || 'typing…';
     case 'custom': return v.text || '';
     default: return '';
@@ -274,10 +288,20 @@ export const ANIMS = ['pop', 'fade', 'slide', 'rise', 'bounce', 'none'];
 
 /* ───────── bubble ───────── */
 
+function tailAtOf(th) {
+  return th.bubble.tailAt || (th.variant === 'imessage' || th.variant === 'overlay' ? 'last' : 'first');
+}
+function hasTailFor(th, it) {
+  const b = th.bubble;
+  if (!b.tail) return false;
+  if (b.tailEvery) return true;
+  return tailAtOf(th) === 'first' ? it.isGroupStart : it.isGroupEnd;
+}
+
 function bubbleShape(ctx, x, y, w, h, th, side, hasTail) {
   const b = th.bubble;
   const r = b.radius;
-  const tailAt = b.tailAt || (th.variant === 'imessage' ? 'last' : 'first');
+  const tailAt = tailAtOf(th);
   let rad = { tl: r, tr: r, br: r, bl: r };
   if (hasTail) {
     if (tailAt === 'first') { if (side === 'in') rad.tl = b.tailRadius; else rad.tr = b.tailRadius; }
@@ -286,7 +310,8 @@ function bubbleShape(ctx, x, y, w, h, th, side, hasTail) {
   rr(ctx, x, y, w, h, rad);
   ctx.fill();
   if (hasTail) {
-    const tw = Math.max(5, r * 0.85), tht = Math.max(7, r * 1.05);
+    const tw = b.tailW != null ? b.tailW : Math.max(5, r * 0.85);
+    const tht = b.tailH != null ? b.tailH : Math.max(7, r * 1.05);
     ctx.beginPath();
     if (tailAt === 'first') {
       if (side === 'in') { ctx.moveTo(x, y); ctx.lineTo(x - tw, y); ctx.quadraticCurveTo(x - tw * 0.1, y + tht * 0.42, x, y + tht); }
@@ -349,9 +374,7 @@ function drawMessage(ctx, it, W, yTop, th, sc, t) {
     ctx.shadowColor = b.shadow; ctx.shadowBlur = b.shadowBlur; ctx.shadowOffsetY = b.shadowY;
   }
   ctx.fillStyle = side === 'out' ? b.outBg : b.inBg;
-  const tailAt = b.tailAt || (th.variant === 'imessage' ? 'last' : 'first');
-  const hasTail = b.tail && (tailAt === 'first' ? it.isGroupStart : it.isGroupEnd);
-  bubbleShape(ctx, x, yTop, it.w, bh, th, side, hasTail);
+  bubbleShape(ctx, x, yTop, it.w, bh, th, side, hasTailFor(th, it));
   ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
   const fg = side === 'out' ? b.outFg : b.inFg;
@@ -517,7 +540,46 @@ function drawHeader(ctx, W, th, sc, t, dotsM) {
   const status = headerStatus(sc, th, t, dotsM);
   const cy = y0 + hd.h / 2;
 
-  if (hd.stacked) {
+  if (th.variant === 'overlay') {
+    // full-bleed film overlay: avatar · name · green dot + status · right icons
+    const ax = hd.padX + hd.avatar / 2;
+    drawAvatar(ctx, sc.contactAvatar, ax, cy, hd.avatar, name, th,
+      { color: hd.avatarRing, w: hd.avatarRingW });
+    const tx = hd.padX + hd.avatar + hd.gap;
+
+    withTextShadow(ctx, th, true);
+    ctx.fillStyle = hd.fg;
+    ctx.font = fontStr(hd.nameSize, hd.nameWeight, th.font);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText(name, tx, cy - hd.nameSize * 0.06);
+
+    if (status) {
+      const isTyping = !!(dotsM && sc.ui.headerTyping);
+      const col = isTyping ? (sc.ui.typingColor || hd.sub) : hd.sub;
+      const sy = cy + hd.subSize + 2.4;
+      let sx = tx;
+      const showDot = !isTyping && evalStep(sc.tracks.status, t, { mode: 'online' }).mode === 'online';
+      if (showDot && hd.statusDot) {
+        ctx.fillStyle = hd.statusDot;
+        ctx.beginPath(); ctx.arc(tx + hd.statusDotR, sy - hd.subSize * 0.33, hd.statusDotR, 0, Math.PI * 2); ctx.fill();
+        sx = tx + hd.statusDotR * 2 + hd.statusDotGap;
+      }
+      ctx.fillStyle = col;
+      ctx.font = fontStr(hd.subSize, 500, th.font);
+      ctx.fillText(status, sx, sy);
+    }
+
+    if (hd.showActions) {
+      const s = hd.iconSize, g = hd.iconGap;
+      let ix = W - (hd.iconRightPad ?? hd.padX) - s / 2;
+      icon(ctx, 'more', ix, cy, s * 1.05, hd.iconColor, 2.6);
+      ix -= g;
+      icon(ctx, 'phone', ix, cy, s, hd.iconColor, 1.9);
+      ix -= g;
+      icon(ctx, 'video', ix, cy, s * 1.05, hd.iconColor, 1.9);
+    }
+    withTextShadow(ctx, th, false);
+  } else if (hd.stacked) {
     // iMessage: centered avatar + name under it
     if (hd.showBack) icon(ctx, 'chevronLeft', hd.padX + 8, cy + 6, 22, hd.iconColor, 2.2);
     drawAvatar(ctx, sc.contactAvatar, W / 2, y0 + hd.h * 0.42, hd.avatar, name, th);
@@ -563,14 +625,17 @@ export function inputMetrics(th, sc, t, W) {
     const p = clamp((t - m.typeStart) / Math.max(0.0001, m.typeDur), 0, 1);
     text = typedText(m, p);
   }
-  const leftPad = th.variant === 'imessage' ? ip.padX + 34 : ip.padX + 8;
-  const rightPad = ip.padX + 54;
-  const pillW = W - leftPad - rightPad;
-  const innerW = pillW - ip.pillPadX * 2 - (th.variant === 'whatsapp' ? 58 : 20);
+  const leftPad = ip.leftPad != null ? ip.leftPad
+    : th.variant === 'imessage' ? ip.padX + 34 : ip.padX + 8;
+  const rightPad = ip.rightPad != null ? ip.rightPad : ip.padX + 54;
+  const pillW = Math.max(20, W - leftPad - rightPad);
+  const reserved = th.variant === 'whatsapp' ? 58 : th.variant === 'overlay' ? (ip.iconSize || 9) * 2 + 20 : 20;
+  const innerW = Math.max(10, pillW - ip.pillPadX * 2 - reserved);
   const lines = text ? wrapText(text, innerW, ip.fontSize, 400, th.font).slice(0, 5) : [''];
   const lineH = ip.fontSize * 1.32;
-  const pillH = Math.max(ip.radius * 2, lines.length * lineH + 17);
-  const h = Math.max(ip.h, pillH + 14);
+  const basePill = ip.pillH != null ? ip.pillH : Math.max(ip.radius * 2, lineH + 17);
+  const pillH = Math.max(basePill, (lines.length - 1) * lineH + basePill);
+  const h = Math.max(ip.h, pillH + Math.max(0, ip.h - basePill));
   return { h, lines, typing: m, text, pillW, pillH, leftPad, rightPad, lineH };
 }
 
@@ -579,19 +644,23 @@ function drawInput(ctx, W, H, th, sc, t, met) {
   if (!ip.show) return;
   const y0 = H - met.h;
   ctx.save();
-  ctx.fillStyle = ip.bg;
-  ctx.fillRect(0, y0, W, met.h);
+  if (ip.bg && ip.bg !== 'transparent') { ctx.fillStyle = ip.bg; ctx.fillRect(0, y0, W, met.h); }
 
   const pillY = y0 + (met.h - met.pillH) / 2;
   ctx.fillStyle = ip.pill;
   rr(ctx, met.leftPad, pillY, met.pillW, met.pillH, Math.min(ip.radius, met.pillH / 2));
   ctx.fill();
-  if (ip.pillStroke) { ctx.strokeStyle = ip.pillStroke; ctx.lineWidth = 1; ctx.stroke(); }
+  if (ip.pillStroke) { ctx.strokeStyle = ip.pillStroke; ctx.lineWidth = ip.pillStrokeW || 1; ctx.stroke(); }
 
   const cyPill = pillY + met.pillH / 2;
   let tx = met.leftPad + ip.pillPadX;
 
-  if (th.variant === 'whatsapp') {
+  if (th.variant === 'overlay') {
+    const s = ip.iconSize || 9.4;
+    icon(ctx, 'smile', met.leftPad + ip.pillPadX + s / 2, cyPill, s, ip.icon, 1.5);
+    tx = met.leftPad + ip.pillPadX + s + 6;
+    icon(ctx, 'clip', met.leftPad + met.pillW - ip.pillPadX - s / 2, cyPill, s, ip.icon, 1.5);
+  } else if (th.variant === 'whatsapp') {
     icon(ctx, 'smile', met.leftPad + 18, cyPill, 21, ip.icon, 1.7);
     tx = met.leftPad + 36;
     icon(ctx, 'clip', met.leftPad + met.pillW - 50, cyPill, 20, ip.icon, 1.7);
@@ -603,7 +672,9 @@ function drawInput(ctx, W, H, th, sc, t, met) {
     tx = met.leftPad + 36;
   }
 
-  const textRight = th.variant === 'whatsapp' ? met.leftPad + met.pillW - 64 : met.leftPad + met.pillW - 34;
+  const textRight = th.variant === 'whatsapp' ? met.leftPad + met.pillW - 64
+    : th.variant === 'overlay' ? met.leftPad + met.pillW - ip.pillPadX - (ip.iconSize || 9.4) - 6
+      : met.leftPad + met.pillW - 34;
   const maxTextW = textRight - tx;
 
   ctx.save();
@@ -637,7 +708,18 @@ function drawInput(ctx, W, H, th, sc, t, met) {
   // send / mic button
   const hasText = !!met.text;
   const bcx = W - ip.padX - 22, bcy = y0 + met.h - met.pillH / 2 - (met.h - met.pillH) / 2;
-  if (th.variant === 'imessage') {
+  if (th.variant === 'overlay') {
+    // mic / send sits OUTSIDE the pill, far right
+    const s = ip.outerIconSize || 9.6;
+    const cxo = (met.leftPad + met.pillW + W) / 2;
+    if (hasText) {
+      ctx.fillStyle = ip.sendBg;
+      ctx.beginPath(); ctx.arc(cxo, cyPill, s * 0.92, 0, Math.PI * 2); ctx.fill();
+      icon(ctx, 'sendFill', cxo + 0.4, cyPill, s * 0.95, ip.sendFg, 0, true);
+    } else {
+      icon(ctx, 'mic', cxo, cyPill, s, ip.icon, 1.6);
+    }
+  } else if (th.variant === 'imessage') {
     if (hasText) {
       ctx.fillStyle = ip.sendBg;
       ctx.beginPath(); ctx.arc(met.leftPad + met.pillW - 16, cyPill, 14, 0, Math.PI * 2); ctx.fill();
@@ -663,8 +745,7 @@ function drawScreen(ctx, proj, sc, t, W, H) {
 
   // background
   ctx.save();
-  ctx.fillStyle = th.screenBg;
-  ctx.fillRect(0, 0, W, H);
+  if (th.screenBg && th.screenBg !== 'transparent') { ctx.fillStyle = th.screenBg; ctx.fillRect(0, 0, W, H); }
   if (sc.wallpaper) {
     const rec = getImage(sc.wallpaper);
     if (rec && rec.ok) {

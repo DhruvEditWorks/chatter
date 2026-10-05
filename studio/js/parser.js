@@ -47,12 +47,22 @@ function parseOpts(raw) {
     if (m) {
       const k = m[1].toLowerCase();
       const v = m[2];
-      o[k] = isNaN(parseFloat(v)) ? stripQuotes(v) : parseFloat(v);
+      // only treat it as a number when the WHOLE token is numeric,
+      // otherwise "9:14PM" would silently become 9
+      o[k] = /^-?\d+(\.\d+)?$/.test(v.trim()) ? parseFloat(v) : stripQuotes(v);
     } else {
       o[tok.toLowerCase()] = true;
     }
   }
   return o;
+}
+
+/** "9:15PM" / "9:15 pm" / "21:15" → "9:15 PM" / "21:15" */
+export function normalizeClock(v) {
+  const s = String(v).trim().replace(/\s+/g, '');
+  const m = /^(\d{1,2}):(\d{2})(am|pm)?$/i.exec(s);
+  if (!m) return String(v).trim();
+  return m[3] ? `${m[1]}:${m[2]} ${m[3].toUpperCase()}` : `${m[1]}:${m[2]}`;
 }
 
 function splitImage(text) {
@@ -87,7 +97,7 @@ function mkMsg(from, raw, opts = {}) {
     showDots: opts.nodots ? false : true,
     showTypeInBar: opts.notype ? false : true,
     locked: false,
-    time: null,                          // bubble clock label (auto if null)
+    time: opts.clock ? normalizeClock(opts.clock) : null,   // bubble clock label (auto if null)
     reaction: opts.react ? { emoji: String(opts.react), t: null } : null,
   };
 }
@@ -266,7 +276,26 @@ export function sceneToScript(scene) {
   return L.join('\n');
 }
 
-export const SAMPLE_SCRIPT = `# Chatter Studio — sample script
+/** Scene 2 — the conversation from the reference frame. */
+export const SAMPLE_SCRIPT = `# Scene 2 — reference frame
+@contact "Amaira"
+@me "Reyansh"
+@clock "9:14 PM"
+@online
+
+Amaira: Heyy                                        || clock=9:14PM
+Amaira: Kya kar rahe ho?                            || clock=9:14PM
+Me: Haan                                            || clock=9:15PM typing=0.9
+Me: Bas thoda kaam kar raha tha                     || clock=9:15PM typing=2.1
+Amaira: Kal ka plan pakka hai na? 😊                || clock=9:15PM
+Me: Haan pakka                                      || clock=9:16PM typing=1.1
+Amaira: It's been so long...                        || clock=9:16PM
+Me: Sach? 🥺                                        || clock=9:16PM typing=0.8
+Amaira: Main seriously milne aa rahi hu is baar. 🤍 || clock=9:17PM dots=2.4
+Me: Main nervous hu yaar...                         || clock=9:17PM typing=2.2
+`;
+
+export const SAMPLE_SCRIPT_WA = `# Chatter Studio — sample script
 @contact "Amaira"
 @me "Reyansh"
 @clock "9:41 PM"

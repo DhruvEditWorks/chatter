@@ -557,13 +557,15 @@ function buildOutputTab() {
   box.innerHTML = '';
   const o = S.proj.out, d = S.proj.device;
 
+  const syncDev = () => { if (d.link) { d.w = o.w; d.h = o.h; invalidate(scene()); } };
+
   box.appendChild(sect('Render frame'));
   box.appendChild(fld('Preset', select('', [['', 'custom…'], ...OUT_PRESETS.map((p) => [p.id, p.label])], (v) => {
     const p = OUT_PRESETS.find((x) => x.id === v);
-    if (p) { o.w = p.w; o.h = p.h; refresh(); }
+    if (p) { o.w = p.w; o.h = p.h; syncDev(); refresh(); }
   })));
-  box.appendChild(fld('Width', inputNum(o.w, (v) => { o.w = Math.round(v); tick(); updateTC(); }, { min: 16, step: 1 }), el('span', { class: 'unit' }, 'px')));
-  box.appendChild(fld('Height', inputNum(o.h, (v) => { o.h = Math.round(v); tick(); updateTC(); }, { min: 16, step: 1 }), el('span', { class: 'unit' }, 'px')));
+  box.appendChild(fld('Width', inputNum(o.w, (v) => { o.w = Math.round(v); syncDev(); tick(); updateTC(); }, { min: 16, step: 1 }), el('span', { class: 'unit' }, 'px')));
+  box.appendChild(fld('Height', inputNum(o.h, (v) => { o.h = Math.round(v); syncDev(); tick(); updateTC(); }, { min: 16, step: 1 }), el('span', { class: 'unit' }, 'px')));
   box.appendChild(fld('Frame rate', select(o.fps, [[23.976, '23.976'], [24, '24'], [25, '25'], [29.97, '29.97'], [30, '30'], [48, '48'], [50, '50'], [60, '60']], (v) => { o.fps = parseFloat(v); refresh(); }), el('span', { class: 'unit' }, 'fps')));
   box.appendChild(fld('Background', select(o.bg, [['transparent', 'transparent (alpha)'], ['#000000', 'black'], ['#ffffff', 'white'], ['#00b140', 'green screen'], ['#0b141a', 'app background']], (v) => { o.bg = v; tick(); })));
   box.appendChild(el('div', { class: 'hint' }, `Aspect ${(o.w / o.h).toFixed(3)}:1 ${Math.abs(o.w / o.h - 2.39) < 0.02 ? '✓ 2.39 scope' : ''}`));
@@ -575,10 +577,17 @@ function buildOutputTab() {
   }
   box.appendChild(el('div', { class: 'hint' }, `${dur().toFixed(2)}s → ${frameCount(S.proj, dur())} frames @ ${o.fps}fps`));
 
-  box.appendChild(sect('Phone screen inside the frame'));
+  box.appendChild(sect('UI surface'));
+  box.appendChild(el('div', { class: 'row' }, checkbox('full-bleed overlay — UI fills the frame', !!d.link, (v) => {
+    d.link = v; if (v) { d.w = o.w; d.h = o.h; d.radius = 0; d.fit = 'height'; d.zoom = 1; }
+    invalidate(scene()); refresh();
+  })));
+  box.appendChild(el('div', { class: 'hint' }, d.link
+    ? 'Overlay mode: the chat UI is the whole 2.39 frame, transparent behind — composite straight over footage.'
+    : 'Phone mode: the UI is a phone screen placed inside the frame. Use the camera keyframes to move it.'));
   box.appendChild(fld('Device', select('', [['', 'custom…'], ...DEVICE_PRESETS.map((p) => [p.id, p.label])], (v) => {
     const p = DEVICE_PRESETS.find((x) => x.id === v);
-    if (p) { d.w = p.w; d.h = p.h; refresh(); }
+    if (p) { d.link = false; d.w = p.w; d.h = p.h; d.radius = p.radius || 0; refresh(); }
   })));
   box.appendChild(fld('Screen W', inputNum(d.w, (v) => { d.w = Math.round(v); invalidate(scene()); tick(); }, { min: 100, step: 1 }), el('span', { class: 'unit' }, 'px')));
   box.appendChild(fld('Screen H', inputNum(d.h, (v) => { d.h = Math.round(v); invalidate(scene()); tick(); }, { min: 100, step: 1 }), el('span', { class: 'unit' }, 'px')));
@@ -587,7 +596,7 @@ function buildOutputTab() {
   box.appendChild(fld('Base zoom', inputNum(d.zoom, (v) => { d.zoom = v; tick(); }, { min: 0.05, max: 6, step: 0.01 }), el('span', { class: 'unit' }, '×')));
 
   const ff = el('button', { class: 'btn sm ghost wide' }, 'Make the UI fill the whole frame');
-  ff.addEventListener('click', () => { d.w = o.w; d.h = o.h; d.fit = 'height'; d.zoom = 1; d.radius = 0; invalidate(scene()); refresh(); });
+  ff.addEventListener('click', () => { d.link = true; d.w = o.w; d.h = o.h; d.fit = 'height'; d.zoom = 1; d.radius = 0; invalidate(scene()); refresh(); });
   box.appendChild(ff);
 
   box.appendChild(sect('Project'));
