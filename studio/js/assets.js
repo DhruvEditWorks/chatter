@@ -5,12 +5,24 @@
 
 const cache = new Map(); // resolved src → {img, ok, w, h, promise}
 
-/** Script paths like "avatars/x.jpg" are relative to the repo root, not /studio/. */
+/**
+ * Script paths like "avatars/x.jpg" are repo-root relative.
+ * When the app is served from a /studio/ subfolder we need to step up one
+ * level; when it is deployed at the site root we must not. Auto-detected so
+ * the same code works in both deployments.
+ */
+const ASSET_BASE = (() => {
+  try {
+    const dir = location.pathname.replace(/[^/]*$/, '');
+    return /\/studio\/$/.test(dir) ? '../' : './';
+  } catch (e) { return './'; }
+})();
+
 export function resolveSrc(src) {
   if (!src) return null;
   const s = String(src).trim();
   if (/^(data:|blob:|https?:\/\/|\/)/i.test(s)) return s;
-  return '../' + s.replace(/^\.\//, '');
+  return ASSET_BASE + s.replace(/^\.\//, '');
 }
 
 export function getImage(src) {
